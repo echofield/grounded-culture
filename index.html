@@ -479,6 +479,111 @@
     box-shadow: 0 8px 24px rgba(0, 229, 255, 0.3), 0 0 32px rgba(199, 36, 255, 0.3);
   }
 
+  .artifact-strip {
+    position: relative;
+    margin: 20px 0 18px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .artifact-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+    margin-bottom: 14px;
+  }
+
+  .artifact-label,
+  .artifact-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .artifact-label { color: var(--cyan); }
+  .artifact-note { color: var(--ink-dim); }
+
+  .artifact-pages {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .artifact-page {
+    min-height: 128px;
+    padding: 12px 10px;
+    border-radius: 4px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(225,228,236,0.92) 100%);
+    color: #111827;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+    transform: rotate(var(--sheet-tilt, 0deg));
+  }
+
+  .artifact-page:nth-child(2) { --sheet-tilt: -1.5deg; }
+  .artifact-page:nth-child(3) { --sheet-tilt: 1.5deg; }
+
+  .artifact-page-tag,
+  .artifact-page-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .artifact-page-tag {
+    color: #7c3aed;
+    margin-bottom: 8px;
+  }
+
+  .artifact-page-title {
+    font-family: 'Bungee', sans-serif;
+    font-size: 12px;
+    line-height: 1.05;
+    margin-bottom: 10px;
+  }
+
+  .artifact-lines {
+    display: grid;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .artifact-lines span {
+    display: block;
+    height: 5px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(17, 24, 39, 0.9), rgba(17, 24, 39, 0.2));
+  }
+
+  .artifact-lines span:nth-child(2) { width: 84%; }
+  .artifact-lines span:nth-child(3) { width: 66%; }
+
+  .artifact-page-meta { color: #4b5563; }
+
+  .artifact-proof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .artifact-chip {
+    padding: 5px 8px;
+    border: 1px solid rgba(0, 229, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(0, 229, 255, 0.04);
+    color: var(--ink-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
   /* Social row */
   .socials {
     display: flex;
@@ -552,6 +657,13 @@
     .featured-title { font-size: 22px; }
     .link-card { padding: 16px; }
     .link-card::after { right: 16px; }
+    .artifact-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .artifact-pages {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 </head>
@@ -606,6 +718,49 @@
     <p class="featured-desc">
       The complete build plan in the right order. Maintenance → Safety → Mods → Power. Every phase, every checkbox, drawn from real builds.
     </p>
+    <div class="artifact-strip">
+      <div class="artifact-head">
+        <div class="artifact-label">Inside the checklist</div>
+        <div class="artifact-note">Instant PDF · phone/tablet-ready · printable</div>
+      </div>
+      <div class="artifact-pages">
+        <div class="artifact-page">
+          <div class="artifact-page-tag">Section 01</div>
+          <div class="artifact-page-title">Build Definition</div>
+          <div class="artifact-lines">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="artifact-page-meta">Goal · budget · priorities</div>
+        </div>
+        <div class="artifact-page">
+          <div class="artifact-page-tag">Section 02</div>
+          <div class="artifact-page-title">Maintenance Baseline</div>
+          <div class="artifact-lines">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="artifact-page-meta">Fluids · belts · hoses</div>
+        </div>
+        <div class="artifact-page">
+          <div class="artifact-page-tag">Section 03</div>
+          <div class="artifact-page-title">Pre-Mod Checks</div>
+          <div class="artifact-lines">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="artifact-page-meta">Brakes · steering · fitment</div>
+        </div>
+      </div>
+      <div class="artifact-proof">
+        <span class="artifact-chip">Builder order</span>
+        <span class="artifact-chip">Garage use</span>
+        <span class="artifact-chip">No guesswork</span>
+      </div>
+    </div>
     <a href="build-system.html" class="cta-btn">
       Download Now
       <span>↗</span>

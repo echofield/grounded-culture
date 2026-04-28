@@ -377,6 +377,105 @@
     color: var(--ink-dim);
   }
 
+  .artifact-preview {
+    margin: 26px 0 6px;
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .artifact-preview-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+    margin-bottom: 14px;
+  }
+
+  .artifact-preview-label,
+  .artifact-preview-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .artifact-preview-label { color: var(--magenta); }
+  .artifact-preview-note { color: var(--ink-dim); }
+
+  .artifact-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .artifact-card {
+    min-height: 136px;
+    padding: 12px 10px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(245, 247, 250, 0.96) 0%, rgba(224, 227, 233, 0.92) 100%);
+    color: #111827;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+  }
+
+  .artifact-card-tag,
+  .artifact-card-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .artifact-card-tag {
+    color: #2563eb;
+    margin-bottom: 8px;
+  }
+
+  .artifact-card-title {
+    font-family: 'Bungee', sans-serif;
+    font-size: 12px;
+    line-height: 1.05;
+    margin-bottom: 10px;
+  }
+
+  .artifact-card-lines {
+    display: grid;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .artifact-card-lines span {
+    display: block;
+    height: 5px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(17, 24, 39, 0.92), rgba(17, 24, 39, 0.22));
+  }
+
+  .artifact-card-lines span:nth-child(2) { width: 82%; }
+  .artifact-card-lines span:nth-child(3) { width: 68%; }
+
+  .artifact-card-meta { color: #4b5563; }
+
+  .artifact-preview-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .artifact-pill {
+    padding: 5px 8px;
+    border: 1px solid rgba(199, 36, 255, 0.2);
+    border-radius: 999px;
+    background: rgba(199, 36, 255, 0.05);
+    color: var(--ink-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
   /* Connecting CTA section */
   .cta-section {
     margin-top: 100px;
@@ -477,6 +576,13 @@
     .deliverables { grid-template-columns: 1fr; }
     .cta-section { padding: 40px 24px; }
     main { padding: 40px 18px 80px; }
+    .artifact-preview-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .artifact-preview-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 </head>
@@ -531,11 +637,54 @@
     <article class="phase reveal">
       <div class="phase-num">01</div>
       <div class="phase-content">
-        <div class="phase-label">Phase 01 // Plan</div>
-        <h2 class="phase-title">Vision Before Wrenches</h2>
-        <p class="phase-desc">
+      <div class="phase-label">Phase 01 // Plan</div>
+      <h2 class="phase-title">Vision Before Wrenches</h2>
+      <p class="phase-desc">
           Most builds die here, not in the engine bay. Lock the vision, define the budget, map the timeline. Every phase that comes after depends on this one being honest.
-        </p>
+      </p>
+      <div class="artifact-preview">
+        <div class="artifact-preview-head">
+          <div class="artifact-preview-label">Inside the file</div>
+          <div class="artifact-preview-note">Built like a garage instrument, not a decorative PDF</div>
+        </div>
+        <div class="artifact-preview-grid">
+          <div class="artifact-card">
+            <div class="artifact-card-tag">Page set 01</div>
+            <div class="artifact-card-title">Build Goal Sheet</div>
+            <div class="artifact-card-lines">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="artifact-card-meta">Vision · chassis · budget</div>
+          </div>
+          <div class="artifact-card">
+            <div class="artifact-card-tag">Page set 02</div>
+            <div class="artifact-card-title">Maintenance Order</div>
+            <div class="artifact-card-lines">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="artifact-card-meta">Fluids · cooling · baseline</div>
+          </div>
+          <div class="artifact-card">
+            <div class="artifact-card-tag">Page set 03</div>
+            <div class="artifact-card-title">Pre-Power Checks</div>
+            <div class="artifact-card-lines">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="artifact-card-meta">Brakes · steering · traction</div>
+          </div>
+        </div>
+        <div class="artifact-preview-foot">
+          <span class="artifact-pill">Builder-made</span>
+          <span class="artifact-pill">Phone in the garage</span>
+          <span class="artifact-pill">Order before power</span>
+        </div>
+      </div>
         <div class="deliverables">
           <a href="https://groundedculture.etsy.com/listing/4439693589" class="deliverable primary" target="_blank" rel="noopener">
             <div class="del-icon">◆</div>
@@ -659,7 +808,7 @@
               <div class="del-meta">YouTube · Long-form process</div>
             </div>
           </a>
-                    <a href="https://www.amazon.com/shop/jdmretrogio/list/13KGYTL80PBN2" class="deliverable" target="_blank" rel="noopener">
+          <a href="https://www.amazon.com/shop/jdmretrogio/list/13KGYTL80PBN2" class="deliverable" target="_blank" rel="noopener">
             <div class="del-icon">CAM</div>
             <div class="del-text">
               <div class="del-name">Content Creator Gear</div>
