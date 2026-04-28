@@ -541,8 +541,8 @@
 
   /* Reveal animations */
   .reveal {
-    opacity: 0;
-    transform: translateY(20px);
+    opacity: 1;
+    transform: none;
   }
 
   /* Mobile tweaks */
@@ -697,13 +697,15 @@
 <script>
   // Staggered reveal on load
   window.addEventListener('load', () => {
-    gsap.to('.reveal', {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      stagger: 0.06,
-      ease: 'power2.out'
-    });
+    if (window.gsap) {
+      gsap.from('.reveal', {
+        opacity: 0,
+        y: 20,
+        duration: 0.8,
+        stagger: 0.06,
+        ease: 'power2.out'
+      });
+    }
   });
 
   // Smooth scroll

@@ -161,7 +161,7 @@
     inset: 0;
     z-index: 1;
     background:
-      linear-gradient(180deg, rgba(5, 5, 16, 0.24) 0%, rgba(5, 5, 16, 0.78) 68%, rgba(5, 5, 16, 0.94) 100%);
+      linear-gradient(180deg, rgba(5, 5, 16, 0.18) 0%, rgba(5, 5, 16, 0.62) 68%, rgba(5, 5, 16, 0.88) 100%);
   }
 
   .hero > * {
@@ -177,7 +177,7 @@
     object-fit: cover;
     object-position: center;
     z-index: 0;
-    opacity: 0.52;
+    opacity: 0.6;
     pointer-events: none;
   }
 
@@ -461,8 +461,8 @@
 
   /* Reveal */
   .reveal {
-    opacity: 0;
-    transform: translateY(30px);
+    opacity: 1;
+    transform: none;
   }
 
   /* Mobile */
@@ -696,42 +696,46 @@
 
 <script>
   window.addEventListener('load', () => {
-    // Initial reveal
-    gsap.to('.hero .reveal', {
-      opacity: 1,
-      y: 0,
+    if (!window.gsap) {
+      return;
+    }
+
+    gsap.from('.hero .reveal', {
+      opacity: 0,
+      y: 30,
       duration: 0.9,
       stagger: 0.1,
       ease: 'power2.out'
     });
 
-    // Scroll-triggered phase reveals
-    gsap.registerPlugin(ScrollTrigger);
+    if (window.ScrollTrigger) {
+      gsap.registerPlugin(ScrollTrigger);
 
-    document.querySelectorAll('.phases .reveal').forEach((el, i) => {
-      gsap.to(el, {
-        opacity: 1,
-        y: 0,
-        duration: 0.7,
+      document.querySelectorAll('.phases .reveal').forEach((el) => {
+        gsap.from(el, {
+          opacity: 0,
+          y: 30,
+          duration: 0.7,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 85%',
+            onEnter: () => el.classList.add('active'),
+          }
+        });
+      });
+
+      gsap.from('.cta-section', {
+        opacity: 0,
+        y: 30,
+        duration: 0.9,
         ease: 'power2.out',
         scrollTrigger: {
-          trigger: el,
-          start: 'top 85%',
-          onEnter: () => el.classList.add('active'),
+          trigger: '.cta-section',
+          start: 'top 80%',
         }
       });
-    });
-
-    gsap.to('.cta-section', {
-      opacity: 1,
-      y: 0,
-      duration: 0.9,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '.cta-section',
-        start: 'top 80%',
-      }
-    });
+    }
   });
 </script>
 
