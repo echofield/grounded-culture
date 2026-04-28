@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="0; url=build-system.html">
 <title>Grounded Culture · Operating System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,9 +207,9 @@
   /* Pillar selector */
   .pillars {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-    margin-bottom: 48px;
+    margin-bottom: 24px;
   }
 
   .pillar {
@@ -247,6 +248,20 @@
 
   .pillar.magenta::before {
     background: linear-gradient(90deg, transparent, var(--magenta), transparent);
+  }
+
+  .pillar-route {
+    margin-bottom: 40px;
+  }
+
+  .route-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-top: 10px;
+    text-align: center;
   }
 
   .pillar-num {
@@ -683,40 +698,48 @@
     <h1 class="wordmark reveal">GROUNDED<br>CULTURE</h1>
     <div class="subtitle reveal">Giovanni Greenidge · Ewa Beach, HI</div>
     <p class="tagline reveal">
-      Two pillars. <span class="em">Cars</span> & <span class="em">Body</span>.<br>
-      Built right. Run hard. Stay grounded.
+      Real build order for <span class="em">project cars</span>, <span class="em">daily resets</span>, and <span class="em">future power plans</span>.<br>
+      S13 and JZX100 logic, organized for builders.
     </p>
   </header>
 
   <!-- SYSTEM STATUS BANNER -->
   <div class="system-banner reveal">
     <div class="dot"></div>
-    <span>System · Online · Choose Your Path</span>
+    <span>Start with the phase you're actually in</span>
   </div>
 
   <!-- PILLAR SELECTOR -->
-  <section class="pillars">
-    <a href="build-system.html" class="pillar reveal">
-      <div class="pillar-num">PILLAR 01</div>
-      <div class="pillar-title">GARAGE</div>
-      <div class="pillar-sub">JZX100 · S13 · RHD builds, tools, planners</div>
-    </a>
-    <a href="#body" class="pillar magenta reveal">
-      <div class="pillar-num">PILLAR 02</div>
-      <div class="pillar-title">BODY</div>
-      <div class="pillar-sub">Coaching · physique · discipline</div>
-    </a>
+  <section class="pillar-route">
+    <div class="pillars">
+      <a href="build-system.html#phase-plan" class="pillar reveal">
+        <div class="pillar-num">Route 01</div>
+        <div class="pillar-title">START A BUILD</div>
+        <div class="pillar-sub">Goal · budget · replacement order</div>
+      </a>
+      <a href="build-system.html#phase-maintenance" class="pillar magenta reveal">
+        <div class="pillar-num">Route 02</div>
+        <div class="pillar-title">RESET THE BASELINE</div>
+        <div class="pillar-sub">Fluids · cooling · reliability first</div>
+      </a>
+      <a href="build-system.html#phase-power" class="pillar reveal">
+        <div class="pillar-num">Route 03</div>
+        <div class="pillar-title">PLAN FOR POWER</div>
+        <div class="pillar-sub">Traction · cooling · power prep</div>
+      </a>
+    </div>
+    <div class="route-note reveal">This is not a pile of links. It is the build order underneath them.</div>
   </section>
 
   <!-- GARAGE SECTION -->
-  <div class="section-h reveal" id="garage"><span class="num">01 //</span> Garage</div>
+  <div class="section-h reveal" id="garage"><span class="num">01 //</span> Start Here</div>
 
   <!-- Featured: Build Checklist -->
   <div class="featured-product reveal">
     <div class="featured-tag">★ My Own Product</div>
     <h2 class="featured-title">Car Build Checklist</h2>
     <p class="featured-desc">
-      The complete build plan in the right order. Maintenance → Safety → Mods → Power. Every phase, every checkbox, drawn from real builds.
+      The checklist is the entry point. The build system shows how each phase connects, what tools belong to it, and what order keeps the project clean.
     </p>
     <div class="artifact-strip">
       <div class="artifact-head">
@@ -762,7 +785,7 @@
       </div>
     </div>
     <a href="build-system.html" class="cta-btn">
-      Download Now
+      Enter the Build System
       <span>↗</span>
     </a>
   </div>

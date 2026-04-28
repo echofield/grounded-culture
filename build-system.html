@@ -146,13 +146,17 @@
   /* Hero */
   .hero {
     position: relative;
-    min-height: 420px;
+    min-height: 560px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+    align-items: flex-start;
+    justify-content: flex-end;
+    text-align: left;
     margin-bottom: 80px;
+    padding: 64px 56px 48px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
   }
 
   .hero::after {
@@ -161,7 +165,7 @@
     inset: 0;
     z-index: 1;
     background:
-      linear-gradient(180deg, rgba(5, 5, 16, 0.18) 0%, rgba(5, 5, 16, 0.62) 68%, rgba(5, 5, 16, 0.88) 100%);
+      linear-gradient(180deg, rgba(5, 5, 16, 0.02) 0%, rgba(5, 5, 16, 0.18) 38%, rgba(5, 5, 16, 0.72) 100%);
   }
 
   .hero > * {
@@ -175,10 +179,18 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
+    object-position: center 30%;
     z-index: 0;
-    opacity: 0.6;
+    opacity: 0.86;
     pointer-events: none;
+  }
+
+  .hero-content {
+    max-width: 720px;
+    padding: 20px 24px 18px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, rgba(5, 5, 16, 0.58) 0%, rgba(5, 5, 16, 0.26) 70%, rgba(5, 5, 16, 0) 100%);
+    backdrop-filter: blur(2px);
   }
 
   .hero-tag {
@@ -195,13 +207,11 @@
   }
 
   .hero h1 {
-    font-family: 'Bungee Inline', sans-serif;
-    font-size: clamp(44px, 9vw, 88px);
+    font-family: 'Bungee', sans-serif;
+    font-size: clamp(40px, 8vw, 84px);
     line-height: 0.9;
-    background: linear-gradient(180deg, var(--ink) 0%, var(--ink-dim) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: #eef2ff;
+    text-shadow: 0 12px 28px rgba(5, 5, 16, 0.45);
     margin-bottom: 20px;
   }
 
@@ -215,11 +225,31 @@
 
   .hero p {
     font-size: 18px;
-    font-weight: 300;
-    color: var(--ink);
-    max-width: 580px;
-    margin: 0 auto;
+    font-weight: 400;
+    color: rgba(238, 242, 255, 0.9);
+    max-width: 640px;
+    margin: 0;
     line-height: 1.55;
+    text-shadow: 0 8px 24px rgba(5, 5, 16, 0.38);
+  }
+
+  .hero-proof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .hero-proof span {
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: rgba(5, 5, 16, 0.34);
+    color: var(--ink-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
 
   /* Phase flow visualization */
@@ -246,6 +276,96 @@
     font-weight: 700;
   }
 
+
+  .entry-grid,
+  .notes-grid,
+  .signals-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .entry-block,
+  .note-block,
+  .signal-block {
+    padding: 18px 18px 16px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .entry-block {
+    text-decoration: none;
+    color: var(--ink);
+    transition: all 0.25s;
+  }
+
+  .entry-block:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 229, 255, 0.26);
+    background: rgba(0, 229, 255, 0.045);
+  }
+
+  .entry-kicker,
+  .note-kicker,
+  .signal-kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+  }
+
+  .entry-title,
+  .note-title,
+  .signal-title {
+    font-family: 'Bungee', sans-serif;
+    font-size: 18px;
+    line-height: 1.02;
+    margin-bottom: 8px;
+  }
+
+  .entry-copy,
+  .note-copy,
+  .signal-copy {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-dim);
+  }
+
+  .entry-copy {
+    margin-bottom: 12px;
+  }
+
+  .entry-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--magenta);
+  }
+
+  .builder-notes,
+  .garage-signals {
+    margin: 48px 0 18px;
+  }
+
+  .builder-notes h2,
+  .garage-signals h2 {
+    font-family: 'Bungee', sans-serif;
+    font-size: clamp(26px, 4vw, 38px);
+    line-height: 1.02;
+    margin-bottom: 10px;
+  }
+
+  .section-intro {
+    max-width: 720px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    margin-bottom: 20px;
+  }
   /* Phases */
   .phases {
     display: flex;
@@ -566,6 +686,11 @@
 
   /* Mobile */
   @media (max-width: 720px) {
+    .hero {
+      min-height: 480px;
+      padding: 40px 20px 28px;
+      justify-content: flex-end;
+    }
     .phase {
       grid-template-columns: 1fr;
       gap: 12px;
@@ -583,6 +708,11 @@
     .artifact-preview-grid {
       grid-template-columns: 1fr;
     }
+    .entry-grid,
+    .notes-grid,
+    .signals-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 </head>
@@ -595,7 +725,7 @@
 <!-- TOP BAR -->
 <nav class="topbar">
   <div class="topbar-inner">
-    <a href="index.html" class="topbar-back">← Back to OS</a>
+    <a href="#start-routes" class="topbar-back">↓ Start Here</a>
     <div class="topbar-mark">GROUNDED</div>
     <a href="https://groundedculture.etsy.com/listing/4439693589" class="topbar-back" target="_blank" rel="noopener">Get the Checklist →</a>
   </div>
@@ -613,34 +743,86 @@
       decoding="async"
       onerror="this.style.display='none';"
     >
-    <div class="hero-tag reveal">// Pillar 01 · Garage</div>
-    <h1 class="reveal">The <span class="accent">Build</span><br>System</h1>
-    <p class="reveal">
-      Every project car has the same five phases. Skip one and the build punishes you. Run them in order and the car runs forever.
+    <div class="hero-content">
+      <div class="hero-tag reveal">// Pillar 01 · Garage</div>
+      <h1 class="reveal">The <span class="accent">Build</span><br>System</h1>
+      <p class="reveal">
+        Real project cars run on order. Start with the plan, lock the maintenance baseline, then move into safety, mods, and power when the chassis is ready.
+      </p>
+      <div class="hero-proof reveal">
+        <span>S13 / JZX100 logic</span>
+        <span>Maintenance before power</span>
+        <span>Built from real ownership</span>
+      </div>
+      <div class="flow-bar reveal">
+        <span class="step">Plan</span>
+        <span class="arrow">→</span>
+        <span class="step">Maintenance</span>
+        <span class="arrow">→</span>
+        <span class="step">Safety</span>
+        <span class="arrow">→</span>
+        <span class="step">Mods</span>
+        <span class="arrow">→</span>
+        <span class="step">Power</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="entry-grid reveal" id="start-routes">
+    <a href="#phase-plan" class="entry-block">
+      <div class="entry-kicker">Start here</div>
+      <div class="entry-title">Starting a Build</div>
+      <div class="entry-copy">Set the chassis goal, budget, replacement order, and parts sequence before the first wrench turns.</div>
+      <div class="entry-meta">Plan · baseline · timeline</div>
+    </a>
+    <a href="#phase-maintenance" class="entry-block">
+      <div class="entry-kicker">Daily reset</div>
+      <div class="entry-title">Refreshing a Driver</div>
+      <div class="entry-copy">Use the same system to clean up fluids, cooling, belts, hoses, and the weak points that ruin builds later.</div>
+      <div class="entry-meta">Maintenance · safety · confidence</div>
+    </a>
+    <a href="#phase-power" class="entry-block">
+      <div class="entry-kicker">Power prep</div>
+      <div class="entry-title">Planning for Boost</div>
+      <div class="entry-copy">Figure out when the car is actually ready for power instead of guessing with expensive parts and crossed fingers.</div>
+      <div class="entry-meta">Cooling · traction · power</div>
+    </a>
+  </section>
+
+  <section class="builder-notes reveal">
+    <h2>Builder Notes</h2>
+    <p class="section-intro">
+      This niche does not need more random product links. It needs build order, replacement logic, and a clear sense of what comes next when a project is half street car, half future tuning plan.
     </p>
-    <div class="flow-bar reveal">
-      <span class="step">Plan</span>
-      <span class="arrow">→</span>
-      <span class="step">Maintenance</span>
-      <span class="arrow">→</span>
-      <span class="step">Safety</span>
-      <span class="arrow">→</span>
-      <span class="step">Mods</span>
-      <span class="arrow">→</span>
-      <span class="step">Power</span>
+    <div class="notes-grid">
+      <div class="note-block">
+        <div class="note-kicker">Authority 01</div>
+        <div class="note-title">Budget Before Horsepower</div>
+        <div class="note-copy">The clean builds usually start by defining the ceiling early. That keeps the car coherent when parts, labor, and shipping start stacking up.</div>
+      </div>
+      <div class="note-block">
+        <div class="note-kicker">Authority 02</div>
+        <div class="note-title">Cooling Before Ambition</div>
+        <div class="note-copy">A lot of future problems are just baseline problems left unresolved. Cooling, leaks, bushings, and driveline health should not be side quests.</div>
+      </div>
+      <div class="note-block">
+        <div class="note-kicker">Authority 03</div>
+        <div class="note-title">Power Follows Proof</div>
+        <div class="note-copy">Once the car proves it can stop, steer, stay cool, and stay planted, then power upgrades stop feeling like a gamble and start feeling earned.</div>
+      </div>
     </div>
   </section>
 
   <!-- PHASES -->
   <section class="phases">
 
-    <article class="phase reveal">
+    <article class="phase reveal" id="phase-plan">
       <div class="phase-num">01</div>
       <div class="phase-content">
       <div class="phase-label">Phase 01 // Plan</div>
       <h2 class="phase-title">Vision Before Wrenches</h2>
       <p class="phase-desc">
-          Most builds die here, not in the engine bay. Lock the vision, define the budget, map the timeline. Every phase that comes after depends on this one being honest.
+          Most builds get expensive here. Lock the vision, define the budget, map the timeline, and make sure the replacement order is clear before parts start showing up.
       </p>
       <div class="artifact-preview">
         <div class="artifact-preview-head">
@@ -697,7 +879,7 @@
       </div>
     </article>
 
-    <article class="phase reveal">
+    <article class="phase reveal" id="phase-maintenance">
       <div class="phase-num">02</div>
       <div class="phase-content">
         <div class="phase-label">Phase 02 // Maintenance</div>
@@ -731,13 +913,13 @@
       </div>
     </article>
 
-    <article class="phase reveal">
+    <article class="phase reveal" id="phase-safety">
       <div class="phase-num">03</div>
       <div class="phase-content">
         <div class="phase-label">Phase 03 // Safety</div>
         <h2 class="phase-title">Stop. Steer. Survive.</h2>
         <p class="phase-desc">
-          Brakes before boost. Bushings before bigger wheels. The order matters because the car has to be able to stop before you give it more reasons to crash.
+          Brakes before boost. Bushings before bigger wheels. The order matters because the car should stop cleanly, steer cleanly, and stay planted before you ask more from it.
         </p>
         <div class="deliverables">
           <a href="https://groundedculture.etsy.com/listing/4439693589" class="deliverable primary" target="_blank" rel="noopener">
@@ -758,7 +940,7 @@
       </div>
     </article>
 
-    <article class="phase reveal">
+    <article class="phase reveal" id="phase-mods">
       <div class="phase-num">04</div>
       <div class="phase-content">
         <div class="phase-label">Phase 04 // Mods</div>
@@ -785,7 +967,7 @@
       </div>
     </article>
 
-    <article class="phase reveal">
+    <article class="phase reveal" id="phase-power">
       <div class="phase-num">05</div>
       <div class="phase-content">
         <div class="phase-label">Phase 05 // Power</div>
@@ -828,11 +1010,35 @@
 
   </section>
 
+
+  <section class="garage-signals reveal">
+    <h2>Garage Signals</h2>
+    <p class="section-intro">
+      The long vision is bigger than one PDF. The checklist is the spine. Around it sit build notes, tool maps, replacement guidance, and the ongoing record of what actually works when a car evolves from daily to tuned project.
+    </p>
+    <div class="signals-grid">
+      <div class="signal-block">
+        <div class="signal-kicker">Return path</div>
+        <div class="signal-title">Build Notes</div>
+        <div class="signal-copy">Short lessons on order, fitment, common misses, and what to replace before you start chasing the fun parts.</div>
+      </div>
+      <div class="signal-block">
+        <div class="signal-kicker">Subscription</div>
+        <div class="signal-title">Follow the Garage</div>
+        <div class="signal-copy">Subscribe where the process moves in public: long-form build videos, updates from the shop, and product drops when a new tool or checklist is ready.</div>
+      </div>
+      <div class="signal-block">
+        <div class="signal-kicker">Next layer</div>
+        <div class="signal-title">Phase Packs</div>
+        <div class="signal-copy">A stronger future version becomes the go-to place for maintenance packs, power prep guidance, and stage-by-stage project organization.</div>
+      </div>
+    </div>
+  </section>
   <!-- CTA -->
   <section class="cta-section reveal">
-    <h2>The full system, <span class="accent">in your hands.</span></h2>
+    <h2>The checklist is the <span class="accent">starting point.</span></h2>
     <p>
-      Five phases. Every checkbox. The complete build plan in the right order — battle-tested on real S13 and JZX100 builds.
+      Five phases. Every checkbox. The right build order for real project cars, daily resets, and future power plans — shaped around real S13 and JZX100 ownership.
     </p>
     <a href="https://groundedculture.etsy.com/listing/4439693589" class="cta-btn-big" target="_blank" rel="noopener">
       Download the Checklist
