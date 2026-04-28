@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grounded Culture · Operating System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Bungee+Inline&family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root {
+    --void: #050510;
+    --void-2: #0a0a1f;
+    --ink: #c8c8e0;
+    --ink-dim: #6a6a8a;
+    --cyan: #00e5ff;
+    --magenta: #c724ff;
+    --hot: #ff2e9a;
+    --steel: #2a2a40;
+    --line: rgba(200, 200, 224, 0.08);
+    --glow-cyan: 0 0 24px rgba(0, 229, 255, 0.5), 0 0 48px rgba(0, 229, 255, 0.25);
+    --glow-magenta: 0 0 24px rgba(199, 36, 255, 0.5), 0 0 48px rgba(199, 36, 255, 0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: var(--void);
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Starfield background layers */
+  .stars {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(199, 36, 255, 0.15) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 80%, rgba(0, 229, 255, 0.12) 0%, transparent 45%),
+      radial-gradient(ellipse at 50% 50%, rgba(255, 46, 154, 0.05) 0%, transparent 60%);
+  }
+
+  .stars::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.8), transparent),
+      radial-gradient(1px 1px at 60px 80px, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 130px 40px, rgba(255,255,255,0.9), transparent),
+      radial-gradient(1px 1px at 200px 120px, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 280px 60px, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1.5px 1.5px at 340px 180px, rgba(255,255,255,0.85), transparent),
+      radial-gradient(1px 1px at 90px 220px, rgba(0, 229, 255, 0.7), transparent),
+      radial-gradient(1px 1px at 250px 280px, rgba(199, 36, 255, 0.6), transparent);
+    background-repeat: repeat;
+    background-size: 400px 300px;
+    animation: drift 120s linear infinite;
+  }
+
+  @keyframes drift {
+    from { transform: translateY(0); }
+    to { transform: translateY(-300px); }
+  }
+
+  /* Scanline overlay */
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.04) 2px,
+      rgba(0, 0, 0, 0.04) 4px
+    );
+    mix-blend-mode: multiply;
+  }
+
+  /* Grain */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 56px;
+    padding-top: 24px;
+  }
+
+  .avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta));
+    padding: 3px;
+    box-shadow: var(--glow-cyan);
+  }
+
+  .avatar-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--void-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bungee', sans-serif;
+    font-size: 28px;
+    background-image:
+      linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .wordmark {
+    font-family: 'Bungee Inline', sans-serif;
+    font-size: clamp(38px, 8vw, 56px);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    background: linear-gradient(90deg, var(--cyan) 0%, var(--magenta) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 16px rgba(0, 229, 255, 0.4));
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 24px;
+  }
+
+  .tagline {
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .tagline .em {
+    color: var(--cyan);
+    font-weight: 500;
+  }
+
+  /* System banner */
+  .system-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    margin: 36px 0;
+    background: rgba(0, 229, 255, 0.04);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+
+  .system-banner .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 12px var(--cyan);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+
+  /* Pillar selector */
+  .pillars {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .pillar {
+    position: relative;
+    padding: 28px 20px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .pillar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .pillar:hover {
+    border-color: rgba(0, 229, 255, 0.4);
+    transform: translateY(-2px);
+    background: linear-gradient(180deg, rgba(0, 229, 255, 0.06) 0%, rgba(0, 229, 255, 0) 100%);
+  }
+
+  .pillar:hover::before { opacity: 1; }
+
+  .pillar.magenta:hover {
+    border-color: rgba(199, 36, 255, 0.4);
+    background: linear-gradient(180deg, rgba(199, 36, 255, 0.06) 0%, rgba(199, 36, 255, 0) 100%);
+  }
+
+  .pillar.magenta::before {
+    background: linear-gradient(90deg, transparent, var(--magenta), transparent);
+  }
+
+  .pillar-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--ink-dim);
+    margin-bottom: 12px;
+  }
+
+  .pillar-title {
+    font-family: 'Bungee', sans-serif;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .pillar-sub {
+    font-size: 13px;
+    color: var(--ink-dim);
+    line-height: 1.4;
+  }
+
+  /* Section heading */
+  .section-h {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 56px 0 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  .section-h::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--line), transparent);
+  }
+
+  .section-h .num {
+    color: var(--cyan);
+  }
+
+  /* Link cards */
+  .link-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .link-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: all 0.25s ease;
+    overflow: hidden;
+  }
+
+  .link-card::after {
+    content: '→';
+    position: absolute;
+    right: 20px;
+    color: var(--ink-dim);
+    font-size: 18px;
+    transition: all 0.25s;
+  }
+
+  .link-card:hover {
+    background: rgba(0, 229, 255, 0.04);
+    border-color: rgba(0, 229, 255, 0.3);
+    transform: translateX(4px);
+  }
+
+  .link-card:hover::after {
+    color: var(--cyan);
+    transform: translateX(4px);
+  }
+
+  .link-card.featured {
+    background: linear-gradient(135deg, rgba(199, 36, 255, 0.08) 0%, rgba(0, 229, 255, 0.04) 100%);
+    border-color: rgba(199, 36, 255, 0.3);
+  }
+
+  .link-card.featured:hover {
+    border-color: var(--magenta);
+    box-shadow: var(--glow-magenta);
+  }
+
+  .link-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bungee', sans-serif;
+    font-size: 14px;
+    color: var(--cyan);
+    flex-shrink: 0;
+  }
+
+  .link-card.magenta .link-icon { color: var(--magenta); }
+
+  .link-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .link-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+
+  .link-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    margin-left: 8px;
+    background: rgba(0, 229, 255, 0.15);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+
+  .badge.featured {
+    background: rgba(199, 36, 255, 0.15);
+    border-color: rgba(199, 36, 255, 0.3);
+    color: var(--magenta);
+  }
+
+  /* Featured product (Build Checklist) */
+  .featured-product {
+    margin: 32px 0;
+    padding: 28px 24px;
+    background:
+      linear-gradient(135deg, rgba(199, 36, 255, 0.06) 0%, rgba(0, 229, 255, 0.04) 100%),
+      var(--void-2);
+    border: 1px solid rgba(199, 36, 255, 0.25);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .featured-product::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(199, 36, 255, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .featured-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--magenta);
+    margin-bottom: 12px;
+    padding: 4px 10px;
+    border: 1px solid rgba(199, 36, 255, 0.3);
+    border-radius: 2px;
+  }
+
+  .featured-title {
+    font-family: 'Bungee', sans-serif;
+    font-size: 26px;
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .featured-desc {
+    font-size: 14px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+    margin-bottom: 18px;
+    position: relative;
+  }
+
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    background: linear-gradient(90deg, var(--cyan) 0%, var(--magenta) 100%);
+    color: var(--void);
+    text-decoration: none;
+    font-family: 'Bungee', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    transition: all 0.25s;
+    position: relative;
+    box-shadow: 0 0 0 rgba(0, 229, 255, 0);
+  }
+
+  .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 229, 255, 0.3), 0 0 32px rgba(199, 36, 255, 0.3);
+  }
+
+  /* Social row */
+  .socials {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 40px 0;
+    flex-wrap: wrap;
+  }
+
+  .social {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--ink-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    transition: all 0.25s;
+  }
+
+  .social:hover {
+    color: var(--cyan);
+    border-color: var(--cyan);
+    box-shadow: var(--glow-cyan);
+    transform: translateY(-2px);
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+
+  .footer-mark {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 8px;
+  }
+
+  .footer-loc {
+    font-size: 13px;
+    color: var(--ink-dim);
+  }
+
+  .footer-loc .accent {
+    color: var(--magenta);
+  }
+
+  /* Reveal animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  /* Mobile tweaks */
+  @media (max-width: 480px) {
+    main { padding: 24px 18px 60px; }
+    .pillars { grid-template-columns: 1fr; }
+    .featured-title { font-size: 22px; }
+    .link-card { padding: 16px; }
+    .link-card::after { right: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+<div class="grain"></div>
+<div class="scanlines"></div>
+
+<main>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="avatar reveal">
+      <div class="avatar-inner">G</div>
+    </div>
+    <h1 class="wordmark reveal">GROUNDED<br>CULTURE</h1>
+    <div class="subtitle reveal">Giovanni Greenidge · Ewa Beach, HI</div>
+    <p class="tagline reveal">
+      Two pillars. <span class="em">Cars</span> & <span class="em">Body</span>.<br>
+      Built right. Run hard. Stay grounded.
+    </p>
+  </header>
+
+  <!-- SYSTEM STATUS BANNER -->
+  <div class="system-banner reveal">
+    <div class="dot"></div>
+    <span>System · Online · Choose Your Path</span>
+  </div>
+
+  <!-- PILLAR SELECTOR -->
+  <section class="pillars">
+    <a href="build-system.html" class="pillar reveal">
+      <div class="pillar-num">PILLAR 01</div>
+      <div class="pillar-title">GARAGE</div>
+      <div class="pillar-sub">JZX100 · S13 · RHD builds, tools, planners</div>
+    </a>
+    <a href="#body" class="pillar magenta reveal">
+      <div class="pillar-num">PILLAR 02</div>
+      <div class="pillar-title">BODY</div>
+      <div class="pillar-sub">Coaching · physique · discipline</div>
+    </a>
+  </section>
+
+  <!-- GARAGE SECTION -->
+  <div class="section-h reveal" id="garage"><span class="num">01 //</span> Garage</div>
+
+  <!-- Featured: Build Checklist -->
+  <div class="featured-product reveal">
+    <div class="featured-tag">★ My Own Product</div>
+    <h2 class="featured-title">Car Build Checklist</h2>
+    <p class="featured-desc">
+      The complete build plan in the right order. Maintenance → Safety → Mods → Power. Every phase, every checkbox, drawn from real builds.
+    </p>
+    <a href="build-system.html" class="cta-btn">
+      Download Now
+      <span>↗</span>
+    </a>
+  </div>
+
+  <div class="link-grid">
+    <a href="build-system.html" class="link-card featured reveal">
+      <div class="link-icon">⚡</div>
+      <div class="link-body">
+        <div class="link-title">Grandfalls Pressure Washer Pro<span class="badge featured">Sponsor</span></div>
+        <div class="link-meta">Detailing · Daily driver care</div>
+      </div>
+    </a>
+
+    <a href="build-system.html" class="link-card reveal">
+      <div class="link-icon">⚙</div>
+      <div class="link-body">
+        <div class="link-title">Tools I Actually Use<span class="badge">21 items</span></div>
+        <div class="link-meta">Amazon storefront · Garage essentials</div>
+      </div>
+    </a>
+
+    <a href="build-system.html" class="link-card reveal">
+      <div class="link-icon">⌂</div>
+      <div class="link-body">
+        <div class="link-title">Full Amazon Storefront</div>
+        <div class="link-meta">Everything I recommend · Curated</div>
+      </div>
+    </a>
+
+    <a href="build-system.html" class="link-card reveal">
+      <div class="link-icon">◈</div>
+      <div class="link-body">
+        <div class="link-title">Custom Merch · Etsy Shop</div>
+        <div class="link-meta">Grounded Culture · Hawaii-made</div>
+      </div>
+    </a>
+
+    <a href="build-system.html" class="link-card reveal">
+      <div class="link-icon">▶</div>
+      <div class="link-body">
+        <div class="link-title">YouTube · Long-form Builds</div>
+        <div class="link-meta">Noah's Car Reviews · Process & teardowns</div>
+      </div>
+    </a>
+
+    <a href="build-system.html" class="link-card reveal">
+      <div class="link-icon">$</div>
+      <div class="link-body">
+        <div class="link-title">Support the S13 / JZX100 Builds</div>
+        <div class="link-meta">Direct contribution · Cash App</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- BODY SECTION -->
+  <div class="section-h reveal" id="body"><span class="num">02 //</span> Body</div>
+
+  <div class="link-grid">
+    <a href="https://www.jotform.com/form/242122789613054" class="link-card magenta reveal" target="_blank" rel="noopener">
+      <div class="link-icon">✦</div>
+      <div class="link-body">
+        <div class="link-title">Apply for Fitness Coaching<span class="badge featured">1:1 Slots</span></div>
+        <div class="link-meta">Application form · Reviewed personally</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- SOCIAL -->
+  <div class="section-h reveal">// Connect</div>
+
+  <div class="socials">
+    <a href="https://www.instagram.com/jdmretrogio/" class="social reveal" target="_blank" rel="noopener" title="Instagram">IG</a>
+    <a href="https://www.tiktok.com/@jdmretrogio" class="social reveal" target="_blank" rel="noopener" title="TikTok">TT</a>
+    <a href="#" class="social reveal" target="_blank" rel="noopener" title="Facebook">FB</a>
+    <a href="#" class="social reveal" target="_blank" rel="noopener" title="Threads">TH</a>
+    <a href="mailto:jdmretrogio@gmail.com" class="social reveal" title="Business inquiries">@</a>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-mark">// Grounded Culture · v1</div>
+    <div class="footer-loc">Built in <span class="accent">Ewa Beach, Hawaii</span></div>
+  </footer>
+
+</main>
+
+<script>
+  // Staggered reveal on load
+  window.addEventListener('load', () => {
+    gsap.to('.reveal', {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      stagger: 0.06,
+      ease: 'power2.out'
+    });
+  });
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

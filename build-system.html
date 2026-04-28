@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grounded Culture · The Build System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Bungee+Inline&family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root {
+    --void: #050510;
+    --void-2: #0a0a1f;
+    --ink: #c8c8e0;
+    --ink-dim: #6a6a8a;
+    --cyan: #00e5ff;
+    --magenta: #c724ff;
+    --hot: #ff2e9a;
+    --steel: #2a2a40;
+    --line: rgba(200, 200, 224, 0.08);
+    --glow-cyan: 0 0 24px rgba(0, 229, 255, 0.5), 0 0 48px rgba(0, 229, 255, 0.25);
+    --glow-magenta: 0 0 24px rgba(199, 36, 255, 0.5), 0 0 48px rgba(199, 36, 255, 0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: var(--void);
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Backgrounds */
+  .stars {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 15% 5%, rgba(199, 36, 255, 0.18) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 95%, rgba(0, 229, 255, 0.14) 0%, transparent 45%);
+  }
+
+  .stars::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1px 1px at 60px 80px, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 130px 40px, rgba(255,255,255,0.85), transparent),
+      radial-gradient(1px 1px at 200px 120px, rgba(255,255,255,0.55), transparent),
+      radial-gradient(1px 1px at 280px 60px, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1.5px 1.5px at 340px 180px, rgba(255,255,255,0.8), transparent),
+      radial-gradient(1px 1px at 90px 220px, rgba(0, 229, 255, 0.65), transparent),
+      radial-gradient(1px 1px at 250px 280px, rgba(199, 36, 255, 0.55), transparent);
+    background-repeat: repeat;
+    background-size: 400px 300px;
+    animation: drift 140s linear infinite;
+  }
+
+  @keyframes drift {
+    from { transform: translateY(0); }
+    to { transform: translateY(-300px); }
+  }
+
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.04) 2px,
+      rgba(0, 0, 0, 0.04) 4px
+    );
+    mix-blend-mode: multiply;
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Top nav bar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(5, 5, 16, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topbar-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .topbar-back {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .topbar-back:hover { color: var(--cyan); }
+
+  .topbar-mark {
+    font-family: 'Bungee Inline', sans-serif;
+    font-size: 16px;
+    background: linear-gradient(90deg, var(--cyan) 0%, var(--magenta) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 0.02em;
+  }
+
+  /* Container */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+  }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-bottom: 80px;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgba(5, 5, 16, 0.24) 0%, rgba(5, 5, 16, 0.78) 68%, rgba(5, 5, 16, 0.94) 100%);
+  }
+
+  .hero > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+    opacity: 0.52;
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--magenta);
+    padding: 6px 14px;
+    border: 1px solid rgba(199, 36, 255, 0.3);
+    border-radius: 2px;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: 'Bungee Inline', sans-serif;
+    font-size: clamp(44px, 9vw, 88px);
+    line-height: 0.9;
+    background: linear-gradient(180deg, var(--ink) 0%, var(--ink-dim) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 .accent {
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 20px rgba(199, 36, 255, 0.4));
+  }
+
+  .hero p {
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--ink);
+    max-width: 580px;
+    margin: 0 auto;
+    line-height: 1.55;
+  }
+
+  /* Phase flow visualization */
+  .flow-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 40px auto 0;
+    flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  .flow-bar .step {
+    color: var(--cyan);
+  }
+
+  .flow-bar .arrow {
+    color: var(--magenta);
+    font-weight: 700;
+  }
+
+  /* Phases */
+  .phases {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 40px;
+  }
+
+  .phase {
+    position: relative;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 32px;
+    padding: 36px 36px 36px 0;
+    border-top: 1px solid var(--line);
+    transition: all 0.4s ease;
+  }
+
+  .phase::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+    transition: width 0.6s ease;
+  }
+
+  .phase.active::before { width: 100%; }
+
+  .phase-num {
+    font-family: 'Bungee', sans-serif;
+    font-size: 56px;
+    line-height: 1;
+    background: linear-gradient(180deg, var(--cyan) 0%, var(--magenta) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    opacity: 0.5;
+    transition: opacity 0.4s;
+  }
+
+  .phase.active .phase-num { opacity: 1; }
+
+  .phase-content { padding-top: 4px; }
+
+  .phase-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 8px;
+  }
+
+  .phase-title {
+    font-family: 'Bungee', sans-serif;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 14px;
+    letter-spacing: 0.01em;
+  }
+
+  .phase-desc {
+    font-size: 15px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+    margin-bottom: 22px;
+    max-width: 640px;
+  }
+
+  /* Phase deliverables */
+  .deliverables {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  .deliverable {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: all 0.25s;
+    font-size: 13px;
+  }
+
+  .deliverable:hover {
+    background: rgba(0, 229, 255, 0.05);
+    border-color: rgba(0, 229, 255, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .deliverable.primary {
+    background: linear-gradient(135deg, rgba(199, 36, 255, 0.08) 0%, rgba(0, 229, 255, 0.04) 100%);
+    border-color: rgba(199, 36, 255, 0.25);
+  }
+
+  .deliverable.primary:hover {
+    border-color: var(--magenta);
+    box-shadow: 0 0 20px rgba(199, 36, 255, 0.25);
+  }
+
+  .del-icon {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+  }
+
+  .deliverable.primary .del-icon { color: var(--magenta); }
+
+  .del-text { flex: 1; min-width: 0; }
+  .del-name { font-weight: 500; line-height: 1.3; margin-bottom: 2px; }
+  .del-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  /* Connecting CTA section */
+  .cta-section {
+    margin-top: 100px;
+    padding: 56px 32px;
+    text-align: center;
+    background:
+      linear-gradient(135deg, rgba(199, 36, 255, 0.08) 0%, rgba(0, 229, 255, 0.05) 100%),
+      var(--void-2);
+    border: 1px solid rgba(199, 36, 255, 0.25);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(199, 36, 255, 0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .cta-section h2 {
+    font-family: 'Bungee', sans-serif;
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .cta-section .accent {
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .cta-section p {
+    font-size: 16px;
+    color: var(--ink-dim);
+    max-width: 520px;
+    margin: 0 auto 28px;
+    line-height: 1.55;
+    position: relative;
+  }
+
+  .cta-btn-big {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 32px;
+    background: linear-gradient(90deg, var(--cyan) 0%, var(--magenta) 100%);
+    color: var(--void);
+    text-decoration: none;
+    font-family: 'Bungee', sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .cta-btn-big:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(0, 229, 255, 0.35), 0 0 48px rgba(199, 36, 255, 0.3);
+  }
+
+  .cta-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-top: 20px;
+    position: relative;
+  }
+
+  /* Reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  /* Mobile */
+  @media (max-width: 720px) {
+    .phase {
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 28px 0;
+    }
+    .phase-num { font-size: 44px; }
+    .phase-title { font-size: 26px; }
+    .deliverables { grid-template-columns: 1fr; }
+    .cta-section { padding: 40px 24px; }
+    main { padding: 40px 18px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+<div class="grain"></div>
+<div class="scanlines"></div>
+
+<!-- TOP BAR -->
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="topbar-back">← Back to OS</a>
+    <div class="topbar-mark">GROUNDED</div>
+    <a href="https://groundedculture.etsy.com/listing/4439693589" class="topbar-back" target="_blank" rel="noopener">Get the Checklist →</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <img
+      src="assets/hero-s13.jpg"
+      alt="Giovanni's S13 build"
+      class="hero-photo"
+      loading="eager"
+      decoding="async"
+      onerror="this.style.display='none';"
+    >
+    <div class="hero-tag reveal">// Pillar 01 · Garage</div>
+    <h1 class="reveal">The <span class="accent">Build</span><br>System</h1>
+    <p class="reveal">
+      Every project car has the same five phases. Skip one and the build punishes you. Run them in order and the car runs forever.
+    </p>
+    <div class="flow-bar reveal">
+      <span class="step">Plan</span>
+      <span class="arrow">→</span>
+      <span class="step">Maintenance</span>
+      <span class="arrow">→</span>
+      <span class="step">Safety</span>
+      <span class="arrow">→</span>
+      <span class="step">Mods</span>
+      <span class="arrow">→</span>
+      <span class="step">Power</span>
+    </div>
+  </section>
+
+  <!-- PHASES -->
+  <section class="phases">
+
+    <article class="phase reveal">
+      <div class="phase-num">01</div>
+      <div class="phase-content">
+        <div class="phase-label">Phase 01 // Plan</div>
+        <h2 class="phase-title">Vision Before Wrenches</h2>
+        <p class="phase-desc">
+          Most builds die here, not in the engine bay. Lock the vision, define the budget, map the timeline. Every phase that comes after depends on this one being honest.
+        </p>
+        <div class="deliverables">
+          <a href="https://groundedculture.etsy.com/listing/4439693589" class="deliverable primary" target="_blank" rel="noopener">
+            <div class="del-icon">◆</div>
+            <div class="del-text">
+              <div class="del-name">Project Build Planner</div>
+              <div class="del-meta">Vehicle profile · Budget · Timeline</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <article class="phase reveal">
+      <div class="phase-num">02</div>
+      <div class="phase-content">
+        <div class="phase-label">Phase 02 // Maintenance</div>
+        <h2 class="phase-title">Make It Reliable First</h2>
+        <p class="phase-desc">
+          Before mods, before power — get the fundamentals right. Fluids, filters, belts, hoses. A reliable platform is the only platform worth modifying.
+        </p>
+        <div class="deliverables">
+          <a href="https://groundedculture.etsy.com/listing/4439693589" class="deliverable primary" target="_blank" rel="noopener">
+            <div class="del-icon">◆</div>
+            <div class="del-text">
+              <div class="del-name">Maintenance Checklist</div>
+              <div class="del-meta">Section 02 · Pre-mod baseline</div>
+            </div>
+          </a>
+          <a href="https://giraffetools.com/products/grandfalls-pressure-washer-pro?sca_ref=10565314.KLVWCGCGd4MR" class="deliverable" target="_blank" rel="noopener">
+            <div class="del-icon">⚡</div>
+            <div class="del-text">
+              <div class="del-name">Grandfalls Pressure Washer</div>
+              <div class="del-meta">Detailing · Bay cleanup</div>
+            </div>
+          </a>
+          <a href="https://www.amazon.com/shop/jdmretrogio/list/21TC65XRAMUOI" class="deliverable" target="_blank" rel="noopener">
+            <div class="del-icon">⚙</div>
+            <div class="del-text">
+              <div class="del-name">Tools I Actually Use</div>
+              <div class="del-meta">Garage essentials</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <article class="phase reveal">
+      <div class="phase-num">03</div>
+      <div class="phase-content">
+        <div class="phase-label">Phase 03 // Safety</div>
+        <h2 class="phase-title">Stop. Steer. Survive.</h2>
+        <p class="phase-desc">
+          Brakes before boost. Bushings before bigger wheels. The order matters because the car has to be able to stop before you give it more reasons to crash.
+        </p>
+        <div class="deliverables">
+          <a href="https://groundedculture.etsy.com/listing/4439693589" class="deliverable primary" target="_blank" rel="noopener">
+            <div class="del-icon">◆</div>
+            <div class="del-text">
+              <div class="del-name">Safety Pre-Mod Checklist</div>
+              <div class="del-meta">Brakes · Steering · Suspension</div>
+            </div>
+          </a>
+          <a href="https://www.amazon.com/shop/jdmretrogio" class="deliverable" target="_blank" rel="noopener">
+            <div class="del-icon">⌂</div>
+            <div class="del-text">
+              <div class="del-name">Storefront · Safety Gear</div>
+              <div class="del-meta">Curated parts</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <article class="phase reveal">
+      <div class="phase-num">04</div>
+      <div class="phase-content">
+        <div class="phase-label">Phase 04 // Mods</div>
+        <h2 class="phase-title">Now You Build the Character</h2>
+        <p class="phase-desc">
+          Suspension geometry, wheel fitment, body lines. This is where the car stops being stock and starts being yours. Every choice should serve the vision from Phase 01.
+        </p>
+        <div class="deliverables">
+          <a href="https://groundedculture.etsy.com/listing/4439693589" class="deliverable primary" target="_blank" rel="noopener">
+            <div class="del-icon">◆</div>
+            <div class="del-text">
+              <div class="del-name">Mod Phase Tracker</div>
+              <div class="del-meta">Section 04 · Modifications log</div>
+            </div>
+          </a>
+          <a href="https://groundedculture.etsy.com/" class="deliverable" target="_blank" rel="noopener">
+            <div class="del-icon">◈</div>
+            <div class="del-text">
+              <div class="del-name">Grounded Culture Merch</div>
+              <div class="del-meta">Wear the build</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <article class="phase reveal">
+      <div class="phase-num">05</div>
+      <div class="phase-content">
+        <div class="phase-label">Phase 05 // Power</div>
+        <h2 class="phase-title">Power Comes Last</h2>
+        <p class="phase-desc">
+          You earned this phase by doing the others right. Tune, boost, breathe — but only on a chassis that can actually handle it. Power without foundation is just a faster way to break things.
+        </p>
+        <div class="deliverables">
+          <a href="https://groundedculture.etsy.com/listing/4439693589" class="deliverable primary" target="_blank" rel="noopener">
+            <div class="del-icon">◆</div>
+            <div class="del-text">
+              <div class="del-name">Power Phase Checklist</div>
+              <div class="del-meta">Tune · Intake · Exhaust · Boost</div>
+            </div>
+          </a>
+          <a href="https://urlgeni.us/youtube/channel/GGio" class="deliverable" target="_blank" rel="noopener">
+            <div class="del-icon">▶</div>
+            <div class="del-text">
+              <div class="del-name">Watch the Builds</div>
+              <div class="del-meta">YouTube · Long-form process</div>
+            </div>
+          </a>
+                    <a href="https://www.amazon.com/shop/jdmretrogio/list/13KGYTL80PBN2" class="deliverable" target="_blank" rel="noopener">
+            <div class="del-icon">CAM</div>
+            <div class="del-text">
+              <div class="del-name">Content Creator Gear</div>
+              <div class="del-meta">Cameras - mounts - workflow</div>
+            </div>
+          </a>
+          <a href="https://cash.app/$Jdmretrogio" class="deliverable" target="_blank" rel="noopener">
+            <div class="del-icon">$</div>
+            <div class="del-text">
+              <div class="del-name">Support the Builds</div>
+              <div class="del-meta">Cash App - direct contribution</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section reveal">
+    <h2>The full system, <span class="accent">in your hands.</span></h2>
+    <p>
+      Five phases. Every checkbox. The complete build plan in the right order — battle-tested on real S13 and JZX100 builds.
+    </p>
+    <a href="https://groundedculture.etsy.com/listing/4439693589" class="cta-btn-big" target="_blank" rel="noopener">
+      Download the Checklist
+      <span>↗</span>
+    </a>
+    <div class="cta-meta">// Etsy · Instant Download · Hawaii-built</div>
+  </section>
+
+</main>
+
+<script>
+  window.addEventListener('load', () => {
+    // Initial reveal
+    gsap.to('.hero .reveal', {
+      opacity: 1,
+      y: 0,
+      duration: 0.9,
+      stagger: 0.1,
+      ease: 'power2.out'
+    });
+
+    // Scroll-triggered phase reveals
+    gsap.registerPlugin(ScrollTrigger);
+
+    document.querySelectorAll('.phases .reveal').forEach((el, i) => {
+      gsap.to(el, {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',
+          onEnter: () => el.classList.add('active'),
+        }
+      });
+    });
+
+    gsap.to('.cta-section', {
+      opacity: 1,
+      y: 0,
+      duration: 0.9,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '.cta-section',
+        start: 'top 80%',
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
